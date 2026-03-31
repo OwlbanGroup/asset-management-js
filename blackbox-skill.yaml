@@ -1,0 +1,362 @@
+---
+# BLACKBOX AI Skill Manifest
+# Cloudinary Asset Management SDK Integration
+
+metadata:
+  id: cloudinary-asset-management
+  name: Cloudinary Asset Management SDK
+  version: 0.5.9
+  category: Cloud Services
+  author: Cloudinary
+  license: MIT
+  
+description: |
+  Complete integration of Cloudinary's asset management capabilities for AI agents.
+  Enables AI to help developers upload, search, manage, and organize digital assets
+  with powerful APIs for images, videos, and documents.
+
+capabilities:
+  - asset-upload
+  - asset-search
+  - asset-organization
+  - folder-management
+  - bulk-operations
+  - video-analytics
+  - content-moderation
+  - asset-relationships
+  - mcp-server-deployment
+
+installation:
+  npm: "@cloudinary/asset-management"
+  yarn: "@cloudinary/asset-management"
+  pnpm: "@cloudinary/asset-management"
+  bun: "@cloudinary/asset-management"
+  requirements:
+    - node: ">=18.0.0"
+    - zod: "for TypeScript support (optional)"
+
+quickstart: |
+  ```typescript
+  import { CloudinaryAssetMgmt } from "@cloudinary/asset-management";
+  
+  const client = new CloudinaryAssetMgmt({
+    cloudName: "your-cloud-name",
+    security: {
+      cloudinaryAuth: {
+        apiKey: "YOUR_API_KEY",
+        apiSecret: "YOUR_API_SECRET",
+      },
+    },
+  });
+  
+  // Upload an asset
+  const result = await client.upload.upload("auto", {
+    file: "/path/to/image.jpg",
+    format: "jpg",
+  });
+  
+  // Search for assets
+  const assets = await client.search.searchAssets({
+    query: "filename:product",
+    maxResults: 50,
+  });
+  
+  // Update asset metadata
+  await client.assets.updateResourceByPublicId({
+    publicId: "folder/filename",
+    tags: ["updated", "processed"],
+  });
+  ```
+
+operations:
+  # Asset Upload (5 operations)
+  upload:
+    - name: upload
+      description: Upload files (images, videos, documents)
+      inputs: [type, file, options]
+      outputs: UploadResponse
+    - name: uploadChunk
+      description: Upload large files in chunks
+      inputs: [file, chunkSize, options]
+      outputs: UploadResponse
+    - name: uploadText
+      description: Upload text content as asset
+      inputs: [text, options]
+      outputs: UploadResponse
+    - name: uploadNoResourceType
+      description: Upload without specifying resource type
+      inputs: [file, options]
+      outputs: UploadResponse
+    - name: destroyAsset
+      description: Delete uploaded asset
+      inputs: [publicId, type, invalidate]
+      outputs: DeleteResponse
+
+  # Asset Retrieval (6 operations)
+  assets:
+    - name: getResourceByAssetId
+      description: Get asset by internal asset ID
+      inputs: [assetId]
+      outputs: CloudinaryResource
+    - name: getResourceByPublicId
+      description: Get asset by public ID
+      inputs: [publicId, type, version]
+      outputs: CloudinaryResource
+    - name: listImages
+      description: List all images in account
+      inputs: [maxResults, prefix, cursor]
+      outputs: "[CloudinaryResource]"
+    - name: listVideos
+      description: List all videos in account
+      inputs: [maxResults, cursor]
+      outputs: "[CloudinaryResource]"
+    - name: listRawFiles
+      description: List all raw files
+      inputs: [maxResults, cursor]
+      outputs: "[CloudinaryResource]"
+    - name: listResourcesByAssetFolder
+      description: List assets in specific folder
+      inputs: [assetFolderId, maxResults]
+      outputs: "[CloudinaryResource]"
+    
+  # Search & Discovery (2 operations)
+  search:
+    - name: searchAssets
+      description: Full-text search across assets
+      inputs: [query, maxResults, sort, cursor]
+      outputs: SearchResponse
+    - name: visualSearchAssets
+      description: Find similar assets using visual similarity
+      inputs: [imageUrl, maxResults]
+      outputs: SearchResponse
+
+  # Asset Updates (3 operations)
+  updates:
+    - name: updateResourceByPublicId
+      description: Update asset metadata, tags, and status
+      inputs: [publicId, tags, context, metadata, moderation_status]
+      outputs: CloudinaryResource
+    - name: updateResourceByAssetId
+      description: Update asset by asset ID
+      inputs: [assetId, tags, context, metadata]
+      outputs: CloudinaryResource
+    - name: renameAsset
+      description: Change asset public ID (expensive operation)
+      inputs: [fromPublicId, toPublicId, type, overwrite]
+      outputs: RenameResponse
+
+  # Deletion & Restoration (4 operations)
+  maintenance:
+    - name: deleteResourcesByPublicId
+      description: Batch delete assets by public ID
+      inputs: [publicIds, type, invalidate]
+      outputs: DeleteResponse
+    - name: restoreResourcesByAssetIDs
+      description: Restore deleted assets (within 30 days)
+      inputs: [assetIds]
+      outputs: RestoreResponse
+    - name: deleteBackupVersions
+      description: Delete backup versions of asset
+      inputs: [assetId, versionIds]
+      outputs: DeleteResponse
+    - name: destroyByAssetId
+      description: Delete asset by asset ID
+      inputs: [assetId, invalidate]
+      outputs: DeleteResponse
+
+  # Folders (7 operations)
+  folders:
+    - name: createFolder
+      description: Create new folder
+      inputs: [displayName, parentFolderId]
+      outputs: Folder
+    - name: destroyFolder
+      description: Delete folder
+      inputs: [parentFolderId]
+      outputs: DestroyResponse
+    - name: listRootFolders
+      description: List top-level folders
+      inputs: [maxResults, cursor]
+      outputs: "[Folder]"
+    - name: showFolder
+      description: Get folder details
+      inputs: [parentFolderId]
+      outputs: Folder
+    - name: updateFolder
+      description: Update folder properties
+      inputs: [parentFolderId, displayName]
+      outputs: Folder
+    - name: searchFolders
+      description: Search folders by name (LIKE pattern)
+      inputs: [displayName, maxResults]
+      outputs: "[Folder]"
+    - name: searchFoldersPost
+      description: Search folders (POST method)
+      inputs: [displayName, maxResults]
+      outputs: "[Folder]"
+
+  # Asset Relationships (4 operations)
+  relationships:
+    - name: createAssetRelationsByPublicId
+      description: Link related assets
+      inputs: [publicId, relatedAssetPublicIds, relationType]
+      outputs: AssetRelation
+    - name: createAssetRelationsByAssetId
+      description: Link assets by asset ID
+      inputs: [assetId, relatedAssetIds, relationType]
+      outputs: AssetRelation
+    - name: deleteAssetRelationsByPublicId
+      description: Remove asset relationships
+      inputs: [publicId, relatedAssetPublicIds, relationType]
+      outputs: DeleteResponse
+    - name: deleteAssetRelationsByAssetId
+      description: Remove relationships by asset ID
+      inputs: [assetId, relatedAssetIds, relationType]
+      outputs: DeleteResponse
+
+  # Advanced Operations (8 operations)
+  advanced:
+    - name: downloadAsset
+      description: Download asset file
+      inputs: [publicId, type, version]
+      outputs: Buffer
+    - name: generateArchive
+      description: Create ZIP/TAR archive of multiple assets
+      inputs: [targetPublicIds, archiveType, format]
+      outputs: ArchiveResponse
+    - name: explicitAsset
+      description: Pre-generate transformations
+      inputs: [publicId, type, eager, eager_async, invalidate]
+      outputs: EagerResponse
+    - name: listResourceTags
+      description: Get all tags in account
+      inputs: [prefix, maxResults]
+      outputs: "[Tag]"
+    - name: listResourceTypes
+      description: Get resource type statistics
+      inputs: []
+      outputs: "[ResourceType]"
+    - name: derivedDestroy
+      description: Delete derived versions of asset
+      inputs: [publicId, derivedResourceIds]
+      outputs: DeleteResponse
+    - name: listResourcesByAssetIDs
+      description: Get multiple assets by IDs
+      inputs: [assetIds]
+      outputs: "[CloudinaryResource]"
+    - name: listResourcesByContext
+      description: Filter assets by metadata
+      inputs: [context, maxResults]
+      outputs: "[CloudinaryResource]"
+
+  # Moderation (1 operation)
+  moderation:
+    - name: listResourcesByModerationKindAndStatus
+      description: List assets by moderation status
+      inputs: [kind, status, maxResults]
+      outputs: "[CloudinaryResource]"
+
+  # Analytics (1 operation)
+  analytics:
+    - name: getVideoViews
+      description: Get video analytics and view count
+      inputs: [publicId, startDate, endDate, groupBy]
+      outputs: VideoAnalytics
+
+  # Usage (1 operation)
+  account:
+    - name: getUsage
+      description: Get account usage and quota statistics
+      inputs: []
+      outputs: UsageStatistics
+
+# Common Use Cases
+useCases:
+  - title: "Batch Upload Campaign Assets"
+    description: "Upload multiple assets for a marketing campaign with automatic tagging"
+    requires: [upload, updateResourceByPublicId]
+    
+  - title: "Build Asset Management Interface"
+    description: "Create search, filter, and browsing UI for asset library"
+    requires: [searchAssets, listImages, listVideos, getResourceByPublicId]
+    
+  - title: "Organize Assets with Folders"
+    description: "Create hierarchical folder structure for asset organization"
+    requires: [createFolder, updateFolder, destroyFolder, listRootFolders]
+    
+  - title: "Content Moderation Workflow"
+    description: "Review and approve user-generated content"
+    requires: [listResourcesByModerationKindAndStatus, updateResourceByPublicId]
+    
+  - title: "Video Performance Analytics"
+    description: "Track video engagement and view statistics"
+    requires: [getVideoViews, listVideos]
+    
+  - title: "Smart Asset Linking"
+    description: "Create relationships between original and derived assets"
+    requires: [createAssetRelationsByPublicId, deleteAssetRelationsByPublicId]
+    
+  - title: "Archive & Export"
+    description: "Generate downloadable archives of asset collections"
+    requires: [generateArchive, listResourcesByContext, downloadAsset]
+    
+  - title: "Restore & Recover"
+    description: "Restore accidentally deleted assets within recovery window"
+    requires: [restoreResourcesByAssetIDs, listResourcesByModerationKindAndStatus]
+
+# Configuration
+configuration:
+  environment_variables:
+    CLOUDINARY_CLOUD_NAME: "Your Cloudinary cloud name"
+    CLOUDINARY_API_KEY: "API key from Cloudinary dashboard"
+    CLOUDINARY_API_SECRET: "API secret from Cloudinary dashboard"
+  
+  sdk_options:
+    cloudName: "Required: Cloudinary cloud identifier"
+    apiKey: "Required: API key for authentication"
+    apiSecret: "Required: API secret for authentication"
+    timeout: "Optional: Request timeout in ms (default: 30000)"
+    debug: "Optional: Enable debug logging (default: false)"
+    retries: "Optional: Number of automatic retries (default: 3)"
+
+# Related Skills
+related:
+  - name: imageProcessing
+    description: "Image transformation and optimization"
+  - name: videoProcessing
+    description: "Video encoding and streaming"
+  - name: storageManagement
+    description: "File storage and CDN configuration"
+
+# Resources
+resources:
+  docs: https://cloudinary.com/documentation
+  api_reference: https://cloudinary.com/documentation/admin_api
+  github: https://github.com/cloudinary/asset-management-js
+  support: https://support.cloudinary.com
+  dashboard: https://cloudinary.com/console
+
+# Integration Checklist
+checklist:
+  - "[ ] Install @cloudinary/asset-management package"
+  - "[ ] Get Cloudinary account and API credentials"
+  - "[ ] Set up environment variables"
+  - "[ ] Import CloudinaryAssetMgmt in your code"
+  - "[ ] Test authentication with getUsage()"
+  - "[ ] Implement error handling and retries"
+  - "[ ] Deploy as MCP server (if using with AI)"
+  - "[ ] Set up logging and monitoring"
+  - "[ ] Configure webhook notifications"
+  - "[ ] Review rate limiting and quotas"
+
+tags:
+  - cloudinary
+  - asset-management
+  - file-upload
+  - image-processing
+  - video-processing
+  - storage
+  - api-sdk
+  - mcp-server
+  - typescript
+  - javascript
