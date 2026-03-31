@@ -281,14 +281,14 @@ run();
 <details open>
 <summary>Available methods</summary>
 
-### [assetRelations](docs/sdks/assetrelations/README.md)
+### [AssetRelations](docs/sdks/assetrelations/README.md)
 
 * [createAssetRelationsByAssetId](docs/sdks/assetrelations/README.md#createassetrelationsbyassetid) - Add related assets by asset ID
 * [deleteAssetRelationsByAssetId](docs/sdks/assetrelations/README.md#deleteassetrelationsbyassetid) - Delete asset relations by asset ID
 * [createAssetRelationsByPublicId](docs/sdks/assetrelations/README.md#createassetrelationsbypublicid) - Create asset relations by public ID
 * [deleteAssetRelationsByPublicId](docs/sdks/assetrelations/README.md#deleteassetrelationsbypublicid) - Delete asset relations by public ID
 
-### [assets](docs/sdks/assets/README.md)
+### [Assets](docs/sdks/assets/README.md)
 
 * [renameAsset](docs/sdks/assets/README.md#renameasset) - Updates an existing asset's identifier (public ID) and optionally other metadata in your Cloudinary account
 * [downloadAsset](docs/sdks/assets/README.md#downloadasset) - Generates a download link for a specific asset (image)
@@ -314,16 +314,15 @@ run();
 * [deleteBackupVersions](docs/sdks/assets/README.md#deletebackupversions) - Delete backed up versions
 * [derivedDestroy](docs/sdks/assets/README.md#deriveddestroy) - Delete derived resources
 
-### [backups](docs/sdks/backups/README.md)
+### [Backups](docs/sdks/backups/README.md)
 
 * [deleteBackupVersions](docs/sdks/backups/README.md#deletebackupversions) - Delete backed up versions
 
-
-### [explode](docs/sdks/explode/README.md)
+### [Explode](docs/sdks/explode/README.md)
 
 * [explodeResource](docs/sdks/explode/README.md#exploderesource) - Create derived images from multi-page file
 
-### [folders](docs/sdks/folders/README.md)
+### [Folders](docs/sdks/folders/README.md)
 
 * [showFolder](docs/sdks/folders/README.md#showfolder) - List sub-folders
 * [updateFolder](docs/sdks/folders/README.md#updatefolder) - Renames or moves an entire folder (along with all assets it contains) to a new location
@@ -332,21 +331,29 @@ run();
 * [listRootFolders](docs/sdks/folders/README.md#listrootfolders) - Get root folders
 * [searchFolders](docs/sdks/folders/README.md#searchfolders) - Searches for folders whose attributes match a given expression
 * [searchFoldersPost](docs/sdks/folders/README.md#searchfolderspost) - Searches for folders in your product environment
+* [getFolderRoles](docs/sdks/folders/README.md#getfolderroles) - Get folder roles
+* [assignFolderRoles](docs/sdks/folders/README.md#assignfolderroles) - Assign folder roles
 
-### [moderations](docs/sdks/moderations/README.md)
+### [Moderations](docs/sdks/moderations/README.md)
 
 * [listResourcesByModerationKindAndStatus](docs/sdks/moderations/README.md#listresourcesbymoderationkindandstatus) - Get resources by moderation kind and status
 
-### [search](docs/sdks/search/README.md)
+### [People](docs/sdks/people/README.md)
+
+* [listPeople](docs/sdks/people/README.md#listpeople) - List recognized people
+* [getPerson](docs/sdks/people/README.md#getperson) - Get person details
+* [updatePerson](docs/sdks/people/README.md#updateperson) - Update a person
+
+### [Search](docs/sdks/search/README.md)
 
 * [searchAssets](docs/sdks/search/README.md#searchassets) - Provides a powerful query interface to filter and retrieve assets and their details
 * [visualSearchAssets](docs/sdks/search/README.md#visualsearchassets) - Finds images in your asset library based on visual similarity or content
 
-### [tags](docs/sdks/tags/README.md)
+### [Tags](docs/sdks/tags/README.md)
 
 * [listResourceTags](docs/sdks/tags/README.md#listresourcetags) - Retrieves a list of tags currently applied to assets in your Cloudinary account
 
-### [upload](docs/sdks/upload/README.md)
+### [Upload](docs/sdks/upload/README.md)
 
 * [upload](docs/sdks/upload/README.md#upload) - Uploads media assets (images, videos, raw files) to your Cloudinary product environment
 * [uploadNoResourceType](docs/sdks/upload/README.md#uploadnoresourcetype) - Upload with automatic file type detection
@@ -354,11 +361,11 @@ run();
 * [destroyAsset](docs/sdks/upload/README.md#destroyasset) - Destroys an asset/resource
 * [text](docs/sdks/upload/README.md#text) - Create image from text
 
-### [usage](docs/sdks/usage/README.md)
+### [Usage](docs/sdks/usage/README.md)
 
 * [getUsage](docs/sdks/usage/README.md#getusage) - Retrieves comprehensive usage metrics and account statistics
 
-### [videoAnalytics](docs/sdks/videoanalytics/README.md)
+### [VideoAnalytics](docs/sdks/videoanalytics/README.md)
 
 * [getVideoViews](docs/sdks/videoanalytics/README.md#getvideoviews) - Get video views
 
@@ -411,13 +418,18 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`assetsUpdateResourceByAssetId`](docs/sdks/assets/README.md#updateresourcebyassetid) - Updates an existing asset's metadata, tags, and other attributes using its asset ID
 - [`assetsUpdateResourceByPublicId`](docs/sdks/assets/README.md#updateresourcebypublicid) - Update asset by public ID
 - [`explodeExplodeResource`](docs/sdks/explode/README.md#exploderesource) - Create derived images from multi-page file
+- [`foldersAssignFolderRoles`](docs/sdks/folders/README.md#assignfolderroles) - Assign folder roles
 - [`foldersCreateFolder`](docs/sdks/folders/README.md#createfolder) - Creates a new empty folder in your Cloudinary media library
 - [`foldersDestroyFolder`](docs/sdks/folders/README.md#destroyfolder) - Deletes an existing folder from your media library
+- [`foldersGetFolderRoles`](docs/sdks/folders/README.md#getfolderroles) - Get folder roles
 - [`foldersListRootFolders`](docs/sdks/folders/README.md#listrootfolders) - Get root folders
 - [`foldersSearchFolders`](docs/sdks/folders/README.md#searchfolders) - Searches for folders whose attributes match a given expression
 - [`foldersSearchFoldersPost`](docs/sdks/folders/README.md#searchfolderspost) - Searches for folders in your product environment
 - [`foldersShowFolder`](docs/sdks/folders/README.md#showfolder) - List sub-folders
 - [`foldersUpdateFolder`](docs/sdks/folders/README.md#updatefolder) - Renames or moves an entire folder (along with all assets it contains) to a new location
+- [`peopleGetPerson`](docs/sdks/people/README.md#getperson) - Get person details
+- [`peopleListPeople`](docs/sdks/people/README.md#listpeople) - List recognized people
+- [`peopleUpdatePerson`](docs/sdks/people/README.md#updateperson) - Update a person
 - [`searchSearchAssets`](docs/sdks/search/README.md#searchassets) - Provides a powerful query interface to filter and retrieve assets and their details
 - [`searchVisualSearchAssets`](docs/sdks/search/README.md#visualsearchassets) - Finds images in your asset library based on visual similarity or content
 - [`uploadDestroyAsset`](docs/sdks/upload/README.md#destroyasset) - Destroys an asset/resource
@@ -608,10 +620,10 @@ run();
 
 
 **Inherit from [`CloudinaryAssetMgmtError`](./src/models/errors/cloudinaryassetmgmterror.ts)**:
-* [`BadRequestError`](./src/models/errors/badrequesterror.ts): Bad request. Status code `400`. Applicable to 1 of 47 methods.*
-* [`DownloadBackupAssetUnauthorizedError`](./src/models/errors/downloadbackupassetunauthorizederror.ts): Authentication failed. Status code `401`. Applicable to 1 of 47 methods.*
-* [`ListResourceTypesUnauthorizedError`](./src/models/errors/listresourcetypesunauthorizederror.ts): Authentication failed. Status code `401`. Applicable to 1 of 47 methods.*
-* [`NotFoundError`](./src/models/errors/notfounderror.ts): Version not found. Status code `404`. Applicable to 1 of 47 methods.*
+* [`BadRequestError`](./src/models/errors/badrequesterror.ts): Bad request. Status code `400`. Applicable to 1 of 52 methods.*
+* [`DownloadBackupAssetUnauthorizedError`](./src/models/errors/downloadbackupassetunauthorizederror.ts): Authentication failed. Status code `401`. Applicable to 1 of 52 methods.*
+* [`ListResourceTypesUnauthorizedError`](./src/models/errors/listresourcetypesunauthorizederror.ts): Authentication failed. Status code `401`. Applicable to 1 of 52 methods.*
+* [`NotFoundError`](./src/models/errors/notfounderror.ts): Version not found. Status code `404`. Applicable to 1 of 52 methods.*
 * [`ResponseValidationError`](./src/models/errors/responsevalidationerror.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
 
 </details>
@@ -644,8 +656,8 @@ If the selected server has variables, you may override its default values throug
 import { CloudinaryAssetMgmt } from "@cloudinary/asset-management";
 
 const cloudinaryAssetMgmt = new CloudinaryAssetMgmt({
-  serverIdx: 1,
-  host: "nutritious-fisherman.net",
+  serverIdx: 0,
+  region: "api-ap",
   cloudName: "<value>",
   security: {
     cloudinaryAuth: {
@@ -726,19 +738,23 @@ The `HTTPClient` constructor takes an optional `fetcher` argument that can be
 used to integrate a third-party HTTP client or when writing tests to mock out
 the HTTP client and feed in fixtures.
 
-The following example shows how to use the `"beforeRequest"` hook to to add a
-custom header and a timeout to requests and how to use the `"requestError"` hook
-to log errors:
+The following example shows how to:
+- route requests through a proxy server using [undici](https://www.npmjs.com/package/undici)'s ProxyAgent
+- use the `"beforeRequest"` hook to add a custom header and a timeout to requests
+- use the `"requestError"` hook to log errors
 
 ```typescript
 import { CloudinaryAssetMgmt } from "@cloudinary/asset-management";
+import { ProxyAgent } from "undici";
 import { HTTPClient } from "@cloudinary/asset-management/lib/http";
 
+const dispatcher = new ProxyAgent("http://proxy.example.com:8080");
+
 const httpClient = new HTTPClient({
-  // fetcher takes a function that has the same signature as native `fetch`.
-  fetcher: (request) => {
-    return fetch(request);
-  }
+  // 'fetcher' takes a function that has the same signature as native 'fetch'.
+  fetcher: (input, init) =>
+    // 'dispatcher' is specific to undici and not part of the standard Fetch API.
+    fetch(input, { ...init, dispatcher } as RequestInit),
 });
 
 httpClient.addHook("beforeRequest", (request) => {
@@ -758,7 +774,7 @@ httpClient.addHook("requestError", (error, request) => {
   console.groupEnd();
 });
 
-const sdk = new CloudinaryAssetMgmt({ httpClient });
+const sdk = new CloudinaryAssetMgmt({ httpClient: httpClient });
 ```
 <!-- End Custom HTTP Client [http-client] -->
 

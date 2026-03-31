@@ -126,7 +126,6 @@ async function $do(
       charEncoding: "percent",
     }),
   };
-
   const path = pathToFunc(
     "/v1_1/{cloud_name}/resources/related_assets/{resource_type}/{type}/{public_id}",
   )(pathParams);
@@ -143,7 +142,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "deleteAssetRelationsByPublicId",
-    oAuth2Scopes: [],
+    oAuth2Scopes: null,
 
     resolvedSecurity: requestSecurity,
 

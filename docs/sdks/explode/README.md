@@ -1,5 +1,4 @@
 # Explode
-(*explode*)
 
 ## Overview
 

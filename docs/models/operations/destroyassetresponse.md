@@ -1,6 +1,6 @@
 # DestroyAssetResponse
 
-Asset/resource destroyed successfully
+Asset/resource destroyed successfully or not found
 
 ## Example Usage
 
@@ -14,4 +14,4 @@ let value: DestroyAssetResponse = {};
 
 | Field                                                  | Type                                                   | Required                                               | Description                                            |
 | ------------------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------ |
-| `result`                                               | [operations.Result](../../models/operations/result.md) | :heavy_minus_sign:                                     | Indicates successful deletion                          |
+| `result`                                               | [operations.Result](../../models/operations/result.md) | :heavy_minus_sign:                                     | Result of the deletion operation                       |

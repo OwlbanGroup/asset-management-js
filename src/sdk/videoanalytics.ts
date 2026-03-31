@@ -18,7 +18,7 @@ export class VideoAnalytics extends ClientSDK {
   async getVideoViews(
     expression?: string | undefined,
     maxResults?: number | undefined,
-    sortBy?: operations.SortBy | undefined,
+    sortBy?: operations.GetVideoViewsSortBy | undefined,
     nextCursor?: string | undefined,
     options?: RequestOptions,
   ): Promise<operations.GetVideoViewsResponse> {

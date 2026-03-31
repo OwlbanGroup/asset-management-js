@@ -3,6 +3,7 @@
  */
 
 export * from "./apierror.js";
+export * from "./cloudinaryassetmgmterror.js";
 export * from "./downloadbackupasset.js";
 export * from "./httpclienterrors.js";
 export * from "./listresourcetypes.js";

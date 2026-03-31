@@ -20,6 +20,10 @@ let value: UpdateResourceByPublicIdRequest = {
     regions: "{\"name1\":[[1,2],[3,4]],\"name2\":[[5,6],[7,8],[9,10]]}",
     qualityOverride: "80:420",
     detection: "captioning",
+    ocr: "adv_ocr",
+    rawConvert: "google_speech",
+    categorization: "google_tagging",
+    backgroundRemoval: "cloudinary_ai",
     accessControl: [
       {
         accessType: "token",
@@ -27,8 +31,8 @@ let value: UpdateResourceByPublicIdRequest = {
       },
       {
         accessType: "anonymous",
-        start: new Date("2024-03-15T09:00:00Z"),
-        end: new Date("2024-06-30T23:59:59Z"),
+        start: "2024-03-15T09:00:00Z",
+        end: "2024-06-30T23:59:59Z",
       },
     ],
   },

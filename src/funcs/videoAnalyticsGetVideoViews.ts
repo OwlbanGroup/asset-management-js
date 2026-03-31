@@ -36,7 +36,7 @@ export function videoAnalyticsGetVideoViews(
   client: CloudinaryAssetMgmtCore,
   expression?: string | undefined,
   maxResults?: number | undefined,
-  sortBy?: operations.SortBy | undefined,
+  sortBy?: operations.GetVideoViewsSortBy | undefined,
   nextCursor?: string | undefined,
   options?: RequestOptions,
 ): APIPromise<
@@ -67,7 +67,7 @@ async function $do(
   client: CloudinaryAssetMgmtCore,
   expression?: string | undefined,
   maxResults?: number | undefined,
-  sortBy?: operations.SortBy | undefined,
+  sortBy?: operations.GetVideoViewsSortBy | undefined,
   nextCursor?: string | undefined,
   options?: RequestOptions,
 ): Promise<
@@ -111,7 +111,6 @@ async function $do(
       charEncoding: "percent",
     }),
   };
-
   const path = pathToFunc("/v1_1/{cloud_name}/video/analytics/views")(
     pathParams,
   );
@@ -134,7 +133,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "getVideoViews",
-    oAuth2Scopes: [],
+    oAuth2Scopes: null,
 
     resolvedSecurity: requestSecurity,
 

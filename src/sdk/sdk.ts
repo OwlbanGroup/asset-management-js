@@ -9,6 +9,7 @@ import { Backups } from "./backups.js";
 import { Explode } from "./explode.js";
 import { Folders } from "./folders.js";
 import { Moderations } from "./moderations.js";
+import { People } from "./people.js";
 import { Search } from "./search.js";
 import { Tags } from "./tags.js";
 import { Upload } from "./upload.js";
@@ -69,5 +70,10 @@ export class CloudinaryAssetMgmt extends ClientSDK {
   private _search?: Search;
   get search(): Search {
     return (this._search ??= new Search(this._options));
+  }
+
+  private _people?: People;
+  get people(): People {
+    return (this._people ??= new People(this._options));
   }
 }

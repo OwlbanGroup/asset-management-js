@@ -10,7 +10,7 @@ let value: ExplicitAssetRequest = {
   requestBody: {
     autoTranscription: true,
     headers: "X-Robots-Tag: noindex",
-    moderation: "webpurify",
+    moderation: "aws_rek|duplicate:0|perception_point|manual",
     publicId: "<id>",
   },
 };

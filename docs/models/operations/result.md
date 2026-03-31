@@ -1,17 +1,17 @@
 # Result
 
-Indicates successful deletion
+Result of the deletion operation
 
 ## Example Usage
 
 ```typescript
 import { Result } from "@cloudinary/asset-management/models/operations";
 
-let value: Result = "ok";
+let value: Result = "not found";
 ```
 
 ## Values
 
 ```typescript
-"ok"
+"ok" | "not found"
 ```

@@ -35,7 +35,17 @@ let value: SearchResponse = {
         "https://res.cloudinary.com/demo/image/upload/v1719316754/blue_sweater.jpg",
       status: "active",
       accessMode: "public",
-      accessControl: null,
+      accessControl: [
+        {
+          accessType: "token",
+          key: "prod2024",
+        },
+        {
+          accessType: "anonymous",
+          start: "2024-03-15T09:00:00Z",
+          end: "2024-06-30T23:59:59Z",
+        },
+      ],
       etag: "7242da7b353e7da2c3eb8c006165b385",
       createdBy: {
         accessKey: "614335564976464",
