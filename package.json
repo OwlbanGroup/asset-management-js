@@ -26,11 +26,17 @@
     "type": "git",
     "url": "https://github.com/cloudinary/asset-management-js.git"
   },
-  "scripts": {
+"scripts": {
     "lint": "eslint --cache --max-warnings=0 src",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
     "build:mcp": "bun src/mcp-server/build.mts",
     "build": "npm run build:mcp && tshy",
-    "prepublishOnly": "npm run build"
+    "clean": "rm -rf dist/ bin/ .tshy/ .tshy-*/",
+    "clean:all": "npm run clean && rm -rf node_modules/.cache",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    ".prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0"
