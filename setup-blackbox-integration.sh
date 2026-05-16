@@ -265,3 +265,47 @@ echo "  • Dashboard: https://cloudinary.com/console"
 echo "  • Documentation: https://cloudinary.com/documentation"
 echo "  • API Reference: https://cloudinary.com/documentation/admin_api"
 echo ""
+
+# Additional Configuration Options
+echo ""
+echo "=================================================================="
+echo "🔧 Additional Configuration"
+echo "=================================================================="
+echo ""
+
+# Ask about advanced features
+read -p "Enable debug mode? (y/n): " DEBUG_MODE
+if [ "$DEBUG_MODE" = "y" ]; then
+  echo "DEBUG=true" >> .env
+  echo "✓ Debug mode enabled"
+fi
+
+read -p "Enable webhook notifications? (y/n): " WEBHOOK
+if [ "$WEBHOOK" = "y" ]; then
+  read -p "Enter webhook URL: " WEBHOOK_URL
+  echo "CLOUDINARY_WEBHOOK_URL=$WEBHOOK_URL" >> .env
+  echo "✓ Webhook configured"
+fi
+
+# Show configuration summary
+echo ""
+echo "=================================================================="
+echo "📊 Configuration Summary"
+echo "=================================================================="
+echo "  • Cloud Name: $CLOUD_NAME"
+echo "  • API Key: ${API_KEY:0:4}...${API_KEY: -4}"
+echo "  • Debug: ${DEBUG_MODE:-false}"
+echo "  • Webhooks: ${WEBHOOK:-false}"
+echo ""
+
+# Final success message
+echo "=================================================================="
+echo "✅ Integration Complete!"
+echo "=================================================================="
+echo ""
+echo "Next steps:"
+echo "  1. Read BLACKBOX_AI_INTEGRATION.md for detailed setup"
+echo "  2. Read BLACKBOX_AI_SKILL.md for complete API reference"
+echo "  3. Check blackbox-skill.yaml for AI tool definitions"
+echo "  4. Start building your asset management system!"
+echo ""

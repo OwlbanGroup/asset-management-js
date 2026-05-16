@@ -643,6 +643,599 @@ const result = await client.upload.uploadChunk({
 
 ---
 
+## Advanced Workflows
+
+### Workflow 1: Automated Content Moderation Pipeline
+
+This workflow automates the entire content moderation process:
+
+```typescript
+import { CloudinaryAssetMgmt } from "@cloudinary/asset-management";
+
+const client = new CloudinaryAssetMgmt({
+  cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+  security: { cloudinaryAuth: {
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+  }},
+});
+
+// Step 1: Fetch pending moderation items
+async function fetchPendingModeration() {
+  return await client.assets.listResourcesByModerationKindAndStatus({
+    kind: "cloudinary_ml",
+    status: "pending",
+    maxResults: 100,
+  });
+}
+
+// Step 2: Review and update status
+async function reviewAsset(publicId: string, approved: boolean) {
+  await client.assets.updateResourceByPublicId({
+    publicId,
+    moderation_status: approved ? "approved" : "rejected",
+    context: {
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: "automated-pipeline",
+    },
+  });
+}
+
+// Step 3: Process batch
+async function processModerationBatch() {
+  const pending = await fetchPendingModeration();
+  
+  for (const asset of pending.resources) {
+    // Add your ML model classification here
+    const classification = await classifyContent(asset);
+    await reviewAsset(asset.public_id, classification.safe);
+  }
+  
+  return { processed: pending.resources.length };
+}
+```
+
+### Workflow 2: Dynamic Image Transformation Pipeline
+
+Real-time image optimization and transformation:
+
+```typescript
+// Upload with automatic transformations
+async function uploadWithTransformations(filePath: string, options: any) {
+  return await client.upload.upload("image", {
+    file: filePath,
+    eager: [
+      // Thumbnail for mobile
+      { width: 150, height: 150, crop: "fill", gravity: "auto", 
+        quality: "auto", fetch_format: "auto" },
+      // Medium resolution
+      { width: 800, height: 600, crop: "limit", 
+        quality: "auto", fetch_format: "auto" },
+      // High resolution for download
+      { quality: "auto:best", fetch_format: "original" },
+    ],
+    eager_async: true,
+    eager_notification_url: options.webhookUrl,
+  });
+}
+
+// Generate transformed URLs on-demand
+function getTransformedUrl(publicId: string, transformation: string) {
+  return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${transformation}/${publicId}`;
+}
+
+// Example transformations
+const transformations = {
+  thumbnail: "c_fill,w_150,h_150,g_auto,q_auto,f_auto",
+  medium: "c_limit,w_800,h_600,q_auto,f_auto", 
+  high: "q_best,f_original",
+  social: "c_fill,w_1200,h_630,g_auto,q_auto,f_auto",
+};
+```
+
+### Workflow 3: Batch Asset Organization
+
+Organize large asset collections automatically:
+
+```typescript
+interface AssetBatch {
+  files: string[];
+  folder: string;
+  tags: string[];
+}
+
+// Create organized folder structure
+async function createFolderStructure(baseName: string, year: string) {
+  const yearFolder = await client.folders.createFolder({
+    displayName: `${baseName}_${year}`,
+  });
+  
+  const quarters = ["Q1", "Q2", "Q3", "Q4"];
+  const subfolders = {};
+  
+  for (const q of quarters) {
+    const folder = await client.folders.createFolder({
+      displayName: q,
+      parentFolderId: yearFolder.id,
+    });
+    subfolders[q] = folder.id;
+  }
+  
+  return { yearFolder, subfolders };
+}
+
+// Batch upload to organized folders
+async function batchUploadAssets(batch: AssetBatch) {
+  const results = [];
+  
+  for (const file of batch.files) {
+    const result = await client.upload.upload("auto", {
+      file,
+      folder: batch.folder,
+      tags: [...batch.tags, `uploaded_${new Date().toISOString().split('T')[0]}`],
+    });
+    results.push(result);
+  }
+  
+  return results;
+}
+
+// Organize by file type
+async function organizeByType(baseFolder: string) {
+  const typeFolders = {
+    images: await client.folders.createFolder({ displayName: `${baseFolder}_images` }),
+    videos: await client.folders.createFolder({ displayName: `${baseFolder}_videos` }),
+    documents: await client.folders.createFolder({ displayName: `${baseFolder}_documents` }),
+    raw: await client.folders.createFolder({ displayName: `${baseFolder}_raw` }),
+  };
+  
+  // Get all assets without folder assignment
+  const allImages = await client.assets.listImages({ maxResults: 500 });
+  const allVideos = await client.assets.listVideos({ maxResults: 500 });
+  
+  // Move to appropriate folders
+  for (const img of allImages.resources) {
+    await client.assets.updateResourceByPublicId({
+      publicId: img.public_id,
+      folder: typeFolders.images.id,
+    });
+  }
+  
+  return { organized: allImages.resources.length + allVideos.resources.length };
+}
+```
+
+### Workflow 4: Video Processing Pipeline
+
+Complete video upload and processing workflow:
+
+```typescript
+interface VideoOptions {
+  file: string;
+  publicId?: string;
+  tags?: string[];
+  webhookUrl?: string;
+}
+
+// Upload video with multiple formats
+async function uploadVideoWithProcessing(options: VideoOptions) {
+  return await client.upload.upload("video", {
+    file: options.file,
+    public_id: options.publicId,
+    tags: options.tags,
+    eager: [
+      // HLS format for streaming
+      {
+        streaming_profile: "hd",
+        format: "m3u8",
+        resource_type: "video",
+      },
+      // Thumbnail at 10% duration
+      {
+        start_offset: "10%",
+        width: 640,
+        height: 360,
+        crop: "fill",
+        format: "jpg",
+        resource_type: "image",
+      },
+    ],
+    eager_async: true,
+    notification_url: options.webhookUrl,
+  });
+}
+
+// Get video analytics summary
+async function getVideoAnalyticsSummary(publicIds: string[]) {
+  const analytics = [];
+  
+  for (const pid of publicIds) {
+    const views = await client.videoAnalytics.getVideoViews({
+      publicId: pid,
+      startDate: "2024-01-01",
+      endDate: new Date().toISOString().split('T')[0],
+      groupBy: "day",
+    });
+    analytics.push({ publicId: pid, views });
+  }
+  
+  return analytics;
+}
+
+// Generate video thumbnail sprite
+async function generateThumbnailSprite(publicId: string, count: number = 10) {
+  return await client.upload.upload("video", {
+    file: `cloudinary://${publicId}`,
+    eager: Array.from({ length: count }, (_, i) => ({
+      timestamp: `${i * 10}%`,
+      width: 160,
+      height: 90,
+      crop: "fill",
+      format: "jpg",
+      resource_type: "image",
+    })),
+    eager_async: true,
+  });
+}
+```
+
+### Workflow 5: Search and Filter Intelligence
+
+Advanced search patterns for asset discovery:
+
+```typescript
+// Complex search queries
+async function advancedSearch(options: {
+  query: string;
+  sortBy?: string;
+  direction?: "asc" | "desc";
+  maxResults?: number;
+}) {
+  return await client.search.searchAssets({
+    query: options.query,
+    sortBy: { field: options.sortBy || "created_at", direction: options.direction || "desc" },
+    maxResults: options.maxResults || 50,
+  });
+}
+
+// Search templates
+const searchQueries = {
+  recentImages: "resource_type:image AND created_at:[now-7d TO now]",
+  highResolution: "resource_type:image AND bytes:>5000000",
+  untagged: "tags:empty",
+  approvedPhotos: "resource_type:image AND moderation_status:approved",
+  byContext: (key: string, value: string) => `context:${key}:${value}`,
+  byDateRange: (start: string, end: string) => `created_at:[${start} TO ${end}]`,
+  largeFiles: "bytes:>10000000",
+  videoOnly: "resource_type:video",
+};
+
+// Faceted search for statistics
+async function getAssetStatistics() {
+  const stats = {
+    totalImages: await advancedSearch({ query: "resource_type:image" }),
+    totalVideos: await advancedSearch({ query: "resource_type:video" }),
+    totalRaw: await advancedSearch({ query: "resource_type:raw" }),
+    pendingModeration: await advancedSearch({ query: "moderation_status:pending" }),
+  };
+  return stats;
+}
+
+// Visual similarity search
+async function findSimilarAssets(imageUrl: string, maxResults: number = 20) {
+  return await client.search.visualSearchAssets({
+    imageUrl,
+    maxResults,
+  });
+}
+```
+
+### Workflow 6: Backup and Archive Management
+
+Automated backup and archive workflows:
+
+```typescript
+// Create scheduled archive
+async function createScheduledArchive(targetPublicIds: string[], archiveName: string) {
+  return await client.assets.generateArchive({
+    targetPublicIds,
+    archiveType: "zip",
+    format: "zip",
+    metadata: {
+      created_by: "automation",
+      scheduled_at: new Date().toISOString(),
+      archive_name: archiveName,
+    },
+  });
+}
+
+// Download asset with backup
+async function downloadWithBackup(publicId: string) {
+  const asset = await client.assets.getResourceByPublicId({ publicId });
+  const backup = await client.assets.downloadBackupAsset({
+    publicId,
+    version: asset.version,
+  });
+  
+  return { asset, backup };
+}
+
+// Version management
+async function listAssetVersions(publicId: string) {
+  const versions = [];
+  const current = await client.assets.getResourceByPublicId({ publicId });
+  
+  for (let v = 1; v <= current.version; v++) {
+    const versioned = await client.assets.getResourceByPublicId({
+      publicId,
+      version: v,
+    });
+    versions.push(versioned);
+  }
+  
+  return versions;
+}
+```
+
+### Workflow 7: Real-time Webhook Processing
+
+Handle webhook notifications for events:
+
+```typescript
+// Webhook endpoint handler (Express)
+import express from "express";
+const app = express();
+app.use(express.json());
+
+interface WebhookEvent {
+  public_id: string;
+  event: string;
+  timestamp: number;
+  api_key: string;
+}
+
+// Handle upload completion
+app.post("/webhooks/upload", async (req, res) => {
+  const event: WebhookEvent = req.body;
+  
+  if (event.event === "upload success") {
+    // Process uploaded file
+    await client.assets.updateResourceByPublicId({
+      publicId: event.public_id,
+      tags: [...req.body.tags, "webhook-processed"],
+    });
+  }
+  
+  res.status(200).json({ received: true });
+});
+
+// Handle transformation completion
+app.post("/webhooks/transformation", async (req, res) => {
+  const event = req.body;
+  
+  if (event.event === "transformation success") {
+    // Notify downstream systems
+    console.log(`Transformation complete: ${event.public_id}`);
+  }
+  
+  res.status(200).json({ received: true });
+});
+
+// Handle archive completion
+app.post("/webhooks/archive", async (req, res) => {
+  const event = req.body;
+  
+  if (event.event === "archive created") {
+    // Send archive link to user
+    console.log(`Archive ready: ${event.archive_url}`);
+  }
+  
+  res.status(200).json({ received: true });
+});
+```
+
+### Workflow 8: Concurrent Operations
+
+Parallel processing for better performance:
+
+```typescript
+import { Promise } from "promise";
+
+// Concurrent uploads
+async function concurrentUploads(files: string[], options: any) {
+  const uploadPromises = files.map(file =>
+    client.upload.upload("auto", { file, ...options })
+  );
+  return await Promise.all(uploadPromises);
+}
+
+// Concurrent searches
+async function concurrentSearches(queries: string[]) {
+  const searchPromises = queries.map(query =>
+    client.search.searchAssets({ query })
+  );
+  return await Promise.all(searchPromises);
+}
+
+// Batch delete with concurrency
+async function batchDelete(publicIds: string[], batchSize: number = 10) {
+  const results = [];
+  
+  for (let i = 0; i < publicIds.length; i += batchSize) {
+    const batch = publicIds.slice(i, i + batchSize);
+    const deletePromises = batch.map(pid =>
+      client.upload.destroyAsset({ publicId: pid }).catch(e => ({ error: e.message, pid }))
+    );
+    const batchResults = await Promise.all(deletePromises);
+    results.push(...batchResults);
+  }
+  
+  return results;
+}
+
+// Concurrent folder creation
+async function createFolderBatch(folders: string[], parentId?: string) {
+  const createPromises = folders.map(name =>
+    client.folders.createFolder({ displayName: name, parentFolderId: parentId })
+  );
+  return await Promise.all(createPromises);
+}
+```
+
+### Workflow 9: Error Recovery
+
+Robust error handling and retry logic:
+
+```typescript
+// Retry decorator
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts: number = 3,
+  delay: number = 1000
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      if (attempt === maxAttempts) throw error;
+      
+      // Exponential backoff
+      const waitTime = delay * Math.pow(2, attempt - 1);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
+// Circuit breaker
+class CircuitBreaker {
+  private failures = 0;
+  private lastFailure: number = 0;
+  private state: "closed" | "open" | "half-open" = "closed";
+  
+  constructor(
+    private threshold: number = 5,
+    private timeout: number = 30000
+  ) {}
+  
+  async execute<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.state === "open") {
+      if (Date.now() - this.lastFailure > this.timeout) {
+        this.state = "half-open";
+      } else {
+        throw new Error("Circuit breaker is open");
+      }
+    }
+    
+    try {
+      const result = await fn();
+      if (this.state === "half-open") {
+        this.state = "closed";
+        this.failures = 0;
+      }
+      return result;
+    } catch (error) {
+      this.failures++;
+      this.lastFailure = Date.now();
+      
+      if (this.failures >= this.threshold) {
+        this.state = "open";
+      }
+      throw error;
+    }
+  }
+}
+
+// Graceful degradation
+async function getAssetWithFallback(publicId: string) {
+  try {
+    return await client.assets.getResourceByPublicId({ publicId });
+  } catch (error) {
+    console.error("Primary fetch failed, trying backup:", error);
+    
+    try {
+      return await client.assets.getResourceByAssetId({
+        assetId: publicId.replace("upload/", "")
+      });
+    } catch (backupError) {
+      console.error("Backup also failed:", backupError);
+      return null;
+    }
+  }
+}
+```
+
+### Workflow 10: Metadata Management
+
+Advanced metadata operations:
+
+```typescript
+// Set rich metadata
+async function setRichMetadata(publicId: string, metadata: {
+  title: string;
+  description: string;
+  author: string;
+  license: string;
+  tags: string[];
+}) {
+  return await client.assets.updateResourceByPublicId({
+    publicId,
+    context: {
+      title: metadata.title,
+      description: metadata.description,
+      author: metadata.author,
+      license: metadata.license,
+    },
+    tags: metadata.tags,
+  });
+}
+
+// Query by metadata
+async function queryByMetadata(key: string, value: string) {
+  return await client.assets.listResourcesByContext({
+    context: { key, value },
+  });
+}
+
+// Bulk metadata update
+async function bulkMetadataUpdate(
+  assetIds: string[],
+  updates: { tags?: string[]; context?: Record<string, string> }
+) {
+  const results = [];
+  
+  for (const assetId of assetIds) {
+    const result = await client.assets.updateResourceByAssetId({
+      assetId,
+      tags: updates.tags,
+      context: updates.context,
+    });
+    results.push(result);
+  }
+  
+  return results;
+}
+
+// Metadata-driven transformations
+async function getMetadataDrivenUrl(publicId: string, metadata: any) {
+  let transformation = "c_fill,w_800,h_600";
+  
+  if (metadata.aspect_ratio === "16:9") {
+    transformation = "c_fill,w_1280,h_720";
+  } else if (metadata.aspect_ratio === "4:3") {
+    transformation = "c_fill,w_1024,h_768";
+  }
+  
+  if (metadata.quality === "high") {
+    transformation += ",q_auto:best";
+  } else if (metadata.quality === "low") {
+    transformation += ",q_auto:eco";
+  }
+  
+  return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${transformation}/${publicId}`;
+}
+```
+
 ## Next Steps
 
 1. ✅ **Complete setup** - Run verification tests

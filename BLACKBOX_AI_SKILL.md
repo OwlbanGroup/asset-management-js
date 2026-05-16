@@ -908,6 +908,327 @@ npm run build:mcp
 
 ---
 
+## Advanced Operations
+
+### Bulk Operations
+
+Process thousands of assets efficiently:
+
+```typescript
+// Bulk upload from directory
+async function bulkUploadFromDirectory(directoryPath: string, options: any) {
+  const fs = require("fs");
+  const files = fs.readdirSync(directoryPath);
+  const results = [];
+  
+  for (const file of files) {
+    // Process in batches of 10
+    const batch = files.slice(0, 10).map(f => 
+      client.upload.upload("auto", { file: `${directoryPath}/${f}`, ...options })
+    );
+    results.push(...await Promise.all(batch));
+  }
+  
+  return results;
+}
+
+// Bulk update with pagination
+async function bulkUpdateTag(oldTag: string, newTag: string) {
+  let cursor;
+  let updated = 0;
+  
+  do {
+    const assets = await client.search.searchAssets({
+      query: `tags:${oldTag}`,
+      maxResults: 500,
+      cursor,
+    });
+    
+    for (const asset of assets.resources) {
+      await client.assets.updateResourceByPublicId({
+        publicId: asset.public_id,
+        tags: [...asset.tags.filter(t => t !== oldTag), newTag],
+      });
+      updated++;
+    }
+    
+    cursor = assets.next_cursor;
+  } while (cursor);
+  
+  return { updated };
+}
+
+// Bulk delete with filter
+async function bulkDeleteByDate(beforeDate: string) {
+  const assets = await client.search.searchAssets({
+    query: `created_at:[* TO ${beforeDate}]`,
+    maxResults: 1000,
+  });
+  
+  const results = [];
+  for (const asset of assets.resources) {
+    try {
+      await client.upload.destroyAsset({ publicId: asset.public_id });
+      results.push({ publicId: asset.public_id, status: "deleted" });
+    } catch (e) {
+      results.push({ publicId: asset.public_id, status: "failed", error: e.message });
+    }
+  }
+  
+  return results;
+}
+```
+
+### Asset Transformation Recipes
+
+Pre-configured transformation pipelines:
+
+```typescript
+// Transformation presets
+const transformationPresets = {
+  social: {
+    instagram: { width: 1080, height: 1080, crop: "fill", gravity: "auto" },
+    facebook: { width: 1200, height: 630, crop: "fill", gravity: "auto" },
+    twitter: { width: 1200, height: 675, crop: "fill", gravity: "auto" },
+    linkedin: { width: 1200, height: 627, crop: "fill", gravity: "auto" },
+  },
+  thumbnails: {
+    small: { width: 150, height: 150, crop: "thumb", gravity: "face" },
+    medium: { width: 300, height: 300, crop: "thumb", gravity: "face" },
+    large: { width: 600, height: 600, crop: "thumb", gravity: "face" },
+  },
+  optimization: {
+    web: { quality: "auto", fetch_format: "auto" },
+    print: { quality: 100, fetch_format: "original" },
+    mobile: { quality: "auto:low", fetch_format: "auto" },
+  },
+};
+
+// Apply preset transformation
+async function applyTransformation(publicId: string, preset: string, variant: string) {
+  const transform = transformationPresets[preset][variant];
+  return await client.upload.upload("auto", {
+    file: `cloudinary://${publicId}`,
+    transformation: transform,
+  });
+}
+```
+
+### Scheduled Operations
+
+Time-based asset management:
+
+```typescript
+// Schedule archive cleanup
+async function scheduleArchiveCleanup(retentionDays: number) {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+  const dateStr = cutoffDate.toISOString().split("T")[0];
+  
+  return await client.search.searchAssets({
+    query: `tags:archive AND created_at:[* TO ${dateStr}]`,
+  });
+}
+
+// Scheduled transformation update
+async function applySeasonalThemes() {
+  const month = new Date().getMonth();
+  let theme;
+  
+  if (month >= 2 && month <= 4) theme = "spring";
+  else if (month >= 5 && month <= 7) theme = "summer";
+  else if (month >= 8 && month <= 10) theme = "fall";
+  else theme = "winter";
+  
+  const seasonalAssets = await client.search.searchAssets({
+    query: `tags:seasonal`,
+  });
+  
+  for (const asset of seasonalAssets.resources) {
+    await client.assets.updateResourceByPublicId({
+      publicId: asset.public_id,
+      tags: [...asset.tags, theme],
+    });
+  }
+  
+  return { updated: seasonalAssets.resources.length, theme };
+}
+```
+
+### Cross-Account Operations
+
+Managing multiple Cloudinary accounts:
+
+```typescript
+interface AccountConfig {
+  cloudName: string;
+  apiKey: string;
+  apiSecret: string;
+}
+
+// Create client for each account
+function createAccountClient(config: AccountConfig) {
+  return new CloudinaryAssetMgmt({
+    cloudName: config.cloudName,
+    security: {
+      cloudinaryAuth: {
+        apiKey: config.apiKey,
+        apiSecret: config.apiSecret,
+      },
+    },
+  });
+}
+
+// Copy assets between accounts
+async function copyAssetBetweenAccounts(
+  sourceClient: CloudinaryAssetMgmt,
+  destClient: CloudinaryAssetMgmt,
+  publicId: string
+) {
+  // Download from source
+  const asset = await sourceClient.assets.getResourceByPublicId({ publicId });
+  const buffer = await sourceClient.assets.downloadAsset({ publicId });
+  
+  // Upload to destination
+  const newAsset = await destClient.upload.upload("auto", {
+    file: buffer,
+    public_id: `${asset.public_id}_copy`,
+    tags: [...asset.tags, "copied"],
+    context: asset.context,
+  });
+  
+  return newAsset;
+}
+
+// Synchronize folders
+async function syncFolderStructure(sourceClient: CloudinaryAssetMgmt, destClient: CloudinaryAssetMgmt) {
+  const sourceFolders = await sourceClient.folders.listRootFolders({});
+  
+  for (const folder of sourceFolders) {
+    const existing = await destClient.folders.searchFolders({
+      displayName: folder.display_name,
+    });
+    
+    if (!existing.length) {
+      await destClient.folders.createFolder({
+        displayName: folder.display_name,
+      });
+    }
+  }
+  
+  return { synced: sourceFolders.length };
+}
+```
+
+### Event-Driven Architecture
+
+Integration with event systems:
+
+```typescript
+// Event types
+type AssetEvent = {
+  type: "upload" | "update" | "delete";
+  publicId: string;
+  asset?: any;
+  timestamp: Date;
+};
+
+// Event emitter class
+class AssetEventEmitter {
+  private listeners: Map<string, Function[]> = new Map();
+  
+  on(event: string, callback: (event: AssetEvent) => void) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event).push(callback);
+  }
+  
+  emit(event: string, data: AssetEvent) {
+    const callbacks = this.listeners.get(event) || [];
+    callbacks.forEach(cb => cb(data));
+  }
+}
+
+// Track upload events
+async function trackUploads(client: CloudinaryAssetMgmt, emitter: AssetEventEmitter) {
+  const uploadEvent = {
+    type: "upload" as const,
+    publicId: "",
+    timestamp: new Date(),
+  };
+  
+  try {
+    const result = await client.upload.upload("auto", {
+      file: "./image.jpg",
+    });
+    
+    uploadEvent.publicId = result.public_id;
+    uploadEvent.asset = result;
+    emitter.emit("upload", uploadEvent);
+    
+    return result;
+  } catch (error) {
+    emitter.emit("error", { ...uploadEvent, error });
+    throw error;
+  }
+}
+```
+
+### Performance Monitoring
+
+Track and optimize performance:
+
+```typescript
+// Performance metrics
+interface PerformanceMetrics {
+  operation: string;
+  duration: number;
+  success: boolean;
+  timestamp: Date;
+}
+
+// Track operation performance
+class PerformanceTracker {
+  private metrics: PerformanceMetrics[] = [];
+  
+  async track<T>(operation: string, fn: () => Promise<T>): Promise<T> {
+    const start = Date.now();
+    
+    try {
+      const result = await fn();
+      this.record({ operation, duration: Date.now() - start, success: true, timestamp: new Date() });
+      return result;
+    } catch (error) {
+      this.record({ operation, duration: Date.now() - start, success: false, timestamp: new Date() });
+      throw error;
+    }
+  }
+  
+  private record(metric: PerformanceMetrics) {
+    this.metrics.push(metric);
+  }
+  
+  getStats(operation?: string) {
+    const filtered = operation 
+      ? this.metrics.filter(m => m.operation === operation)
+      : this.metrics;
+    
+    const avgDuration = filtered.reduce((a, m) => a + m.duration, 0) / filtered.length;
+    const successRate = filtered.filter(m => m.success).length / filtered.length;
+    
+    return { operations: filtered.length, avgDuration, successRate };
+  }
+}
+
+// Usage example
+const tracker = new PerformanceTracker();
+const result = await tracker.track("upload", () => 
+  client.upload.upload("auto", { file: "./image.jpg" })
+);
+const stats = tracker.getStats("upload");
+```
+
 ## Version History
 
 - **0.5.9** - Current version with full API support
