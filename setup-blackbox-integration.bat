@@ -248,10 +248,43 @@ echo   2. Configure your IDE (Claude/Cursor) if using MCP
 echo   3. Check BLACKBOX_AI_SKILL.md for operation examples
 echo   4. Start using Cloudinary in BLACKBOX AI!
 echo.
-echo Resources:
-echo   + https://cloudinary.com/console
-echo   + https://cloudinary.com/documentation
-echo   + https://github.com/cloudinary/asset-management-js
+echo ==================================================================
+echo Additional Configuration
+echo ==================================================================
+echo.
+
+set /p DEBUG_MODE="Enable debug mode? (y/n): "
+if /i "%DEBUG_MODE%"=="y" (
+    echo DEBUG=true>> .env
+    echo [√] Debug mode enabled
+)
+
+set /p WEBHOOK="Enable webhook notifications? (y/n): "
+if /i "%WEBHOOK%"=="y" (
+    set /p WEBHOOK_URL="Enter webhook URL: "
+    echo CLOUDINARY_WEBHOOK_URL=%WEBHOOK_URL%>> .env
+    echo [√] Webhook configured
+)
+
+echo.
+echo ==================================================================
+echo Configuration Summary
+echo ==================================================================
+echo   - Cloud Name: %CLOUD_NAME%
+echo   - API Key: %API_KEY:~0,4%...%API_KEY:~-4%
+echo   - Debug: %DEBUG_MODE%
+echo   - Webhooks: %WEBHOOK%
+echo.
+
+echo ==================================================================
+echo Integration Complete!
+echo ==================================================================
+echo.
+echo Next steps:
+echo   1. Read BLACKBOX_AI_INTEGRATION.md for detailed setup
+echo   2. Read BLACKBOX_AI_SKILL.md for complete API reference
+echo   3. Check blackbox-skill.yaml for AI tool definitions
+echo   4. Start building your asset management system!
 echo.
 
 pause

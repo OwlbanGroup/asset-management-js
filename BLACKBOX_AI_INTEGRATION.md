@@ -1295,6 +1295,177 @@ node -e "require('dotenv').config(); console.log('Cloud:', process.env.CLOUDINAR
 
 ---
 
-**Version:** 1.0  
-**Last Updated:** 2024  
+**Version:** 1.1  
+**Last Updated:** 2025  
 **SDK Version:** 0.5.9
+
+---
+
+## Recommended Additional Features
+
+### Feature 1: Upload Presets
+
+Configure automatic optimization presets:
+
+```typescript
+const uploadPresets = {
+  thumbnail: { width: 150, height: 150, crop: "fill", gravity: "auto", quality: "auto" },
+  social: { width: 1200, height: 630, crop: "fill", quality: "auto" },
+  highQuality: { quality: "auto:best", fetch_format: "original" },
+  optimized: { quality: "auto", fetch_format: "auto", progressive: true }
+};
+
+async function uploadWithPreset(filePath: string, preset: string) {
+  return await client.upload.upload("auto", { file: filePath, ...uploadPresets[preset] });
+}
+```
+
+### Feature 2: Asset Tagging Automation
+
+Auto-tag assets based on content:
+
+```typescript
+async function autoTagAssets(publicIds: string[]) {
+  const results = [];
+  for (const pid of publicIds) {
+    const result = await client.assets.updateResourceByPublicId({
+      publicId: pid,
+      autoTagging: 0.7, // Enable auto-tagging with 70% confidence
+    });
+    results.push(result);
+  }
+  return results;
+}
+```
+
+### Feature 3: Signed URLs
+
+Generate secure signed URLs:
+
+```typescript
+function generateSignedUrl(publicId: string, expiresIn: number = 3600) {
+  const timestamp = Math.floor(Date.now() / 1000) + expiresIn;
+  return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${publicId}?sign=${timestamp}`;
+}
+```
+
+### Feature 4: Progress Tracking
+
+Track upload progress for large files:
+
+```typescript
+async function uploadWithProgress(file: File, onProgress: (p: number) => void) {
+  return await client.upload.uploadChunk({
+    file,
+    chunkSize: 20_000_000,
+    onProgress: (progress) => onProgress(progress.loaded / progress.total * 100)
+  });
+}
+```
+
+### Feature 5: Cache Invalidation
+
+Purge CDN cache for updated assets:
+
+```typescript
+async function invalidateAsset(publicId: string) {
+  return await client.upload.destroyAsset({ publicId, invalidate: true });
+}
+```
+
+### Feature 6: Usage Alerts
+
+Set up usage monitoring:
+
+```typescript
+async function checkUsageAndAlert(threshold: number = 0.9) {
+  const usage = await client.usage.getUsage();
+  const usagePercent = usage.objects / 100000; // Assuming 100k limit
+  
+  if (usagePercent > threshold) {
+    console.warn(`⚠️ Usage at ${(usagePercent * 100).toFixed(1)}% of limit!`);
+  }
+  return usage;
+}
+```
+
+### Feature 7: Batch Processing with Rate Limiting
+
+Process large batches without hitting rate limits:
+
+```typescript
+async function batchProcess<T>(
+  items: T[],
+  processor: (item: T) => Promise<any>,
+  batchSize: number = 10,
+  delayMs: number = 1000
+) {
+  const results = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(processor));
+    results.push(...batchResults);
+    if (i + batchSize < items.length) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+  return results;
+}
+```
+
+### Feature 8: Conditional Updates
+
+Update only if conditions are met:
+
+```typescript
+async function conditionalUpdate(publicId: string, updates: any, conditions: any) {
+  const current = await client.assets.getResourceByPublicId({ publicId }).catch(() => null);
+  
+  if (!current) return null;
+  if (conditions.updatedBefore && new Date(current.updated_at) > conditions.updatedBefore) {
+    return { skipped: true, reason: "already_updated" };
+  }
+  
+  return await client.assets.updateResourceByPublicId({ publicId, ...updates });
+}
+```
+
+### Feature 9: Asset Validation
+
+Validate asset before operations:
+
+```typescript
+async function validateAsset(publicId: string) {
+  const asset = await client.assets.getResourceByPublicId({ publicId })
+    .catch(() => null);
+  
+  if (!asset) return { valid: false, reason: "not_found" };
+  if (asset.bytes > 100_000_000) return { valid: false, reason: "too_large" };
+  if (asset.resource_type === "video" && !asset.duration) return { valid: false, reason: "processing" };
+  
+  return { valid: true, asset };
+}
+```
+
+### Feature 10: Health Check
+
+Monitor integration health:
+
+```typescript
+async function healthCheck() {
+  const checks = {
+    api: false,
+    credentials: false,
+    upload: false,
+    search: false
+  };
+  
+  try {
+    const usage = await client.usage.getUsage();
+    checks.credentials = !!usage;
+    checks.api = true;
+  } catch (e) { /* not connected */ }
+  
+  return { healthy: checks.api && checks.credentials, checks };
+}
+```

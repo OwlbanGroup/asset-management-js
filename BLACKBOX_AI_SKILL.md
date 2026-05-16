@@ -1235,7 +1235,105 @@ const stats = tracker.getStats("upload");
 - See **RELEASES.md** for detailed changelog
 
 ---
-
-**Last Updated:** 2024
+**Last Updated:** 2025
 **Maintained by:** Cloudinary  
 **License:** MIT
+
+---
+
+## Additional Recommended Features
+
+### Upload Presets
+```typescript
+const uploadPresets = {
+  thumbnail: { width: 150, height: 150, crop: "fill", quality: "auto" },
+  social: { width: 1200, height: 630, crop: "fill", quality: "auto" },
+  optimized: { quality: "auto", fetch_format: "auto" }
+};
+```
+
+### Auto-Tagging
+```typescript
+await client.assets.updateResourceByPublicId({
+  publicId: "asset-id",
+  autoTagging: 0.7 // 70% confidence threshold
+});
+```
+
+### Usage Alerts
+```typescript
+async function checkUsageAndAlert(threshold = 0.9) {
+  const usage = await client.usage.getUsage();
+  if (usage.objects / 100000 > threshold) {
+    console.warn(`Usage at ${(usage.objects/100000)*100}%`);
+  }
+}
+```
+
+### Health Check
+```typescript
+async function healthCheck() {
+  try {
+    await client.usage.getUsage();
+    return { healthy: true };
+  } catch {
+    return { healthy: false };
+  }
+}
+```
+
+### Batch Processing
+```typescript
+async function batchProcess(items, processor, batchSize = 10) {
+  const results = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    results.push(...await Promise.all(batch.map(processor)));
+  }
+  return results;
+}
+```
+
+### Progress Tracking
+```typescript
+async function uploadWithProgress(file, onProgress) {
+  return await client.upload.uploadChunk({
+    file,
+    chunkSize: 20_000_000,
+    onProgress: (p) => onProgress(p.loaded / p.total * 100)
+  });
+}
+```
+
+### Asset Validation
+```typescript
+async function validateAsset(publicId) {
+  const asset = await client.assets.getResourceByPublicId({ publicId }).catch(() => null);
+  if (!asset) return { valid: false, reason: "not_found" };
+  return { valid: true, asset };
+}
+```
+
+### Signed URLs
+```typescript
+function generateSignedUrl(publicId, expiresIn = 3600) {
+  const ts = Math.floor(Date.now() / 1000) + expiresIn;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}?sign=${ts}`;
+}
+```
+
+### Conditional Updates
+```typescript
+async function conditionalUpdate(publicId, updates, conditions) {
+  const current = await client.assets.getResourceByPublicId({ publicId }).catch(() => null);
+  if (!current) return null;
+  return await client.assets.updateResourceByPublicId({ publicId, ...updates });
+}
+```
+
+### Cache Invalidation
+```typescript
+async function invalidateAsset(publicId) {
+  return await client.upload.destroyAsset({ publicId, invalidate: true });
+}
+```
