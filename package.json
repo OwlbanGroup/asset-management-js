@@ -36,7 +36,7 @@
     "clean:all": "npm run clean && rm -rf node_modules/.cache",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    ".prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0"
