@@ -7,7 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+---## [0.6.0] - 2025-XX-XX
+
+### Changed
+
+- **Access control type updates** (breaking changes):
+  - `upload()` and `uploadChunk()`: `request.upload_request.accessControl` field changed
+  - `uploadNoResourceType()`: `request.accessControl` field changed
+  - `uploadText()`: `response.access_control[]` field changed
+  - `listImages()`, `listVideos()`, `listRawFiles()`, `listResourcesByAssetFolder()`, `listResourcesByAssetIDs()`, `listResourcesByContext()`, `listResourcesByModerationKindAndStatus()`: `response.resources[].accessControl[]` changed
+  - `getResourceByPublicId()`: `response.access_control[]` changed
+  - `getResourceByAssetId()`: `response.access_control[]` changed
+  - `updateResourceByPublicId()` and `updateResourceByAssetId()`: `request.resourceupdaterequest.accessControl` and `response.access_control[]` changed
+  - `searchAssets()` and `visualSearchAssets()`: `response.resources[].accessControl` changed
+- Access control types refactored: `AccessControl`, `AccessControlToken`, `AccessControlAnonymous` with proper inbound/outbound schema mapping
+- New `access_control` parameter added to `upload()` and `update*` operations for specifying access control settings
+
+### Changed
+
+- Project renamed to @cloudinary/asset-management
+- Updated package.json with proper exports configuration
+- Enhanced TypeScript support with comprehensive types
+
+### Fixed
+
+- Fixed export configuration for dual ESM/CommonJS support
+
+### Dependencies
+
+- Added @modelcontextprotocol/sdk as peer dependency
+- Updated zod dependency version
+
+---## [Unreleased]
 
 ### Added
 
@@ -17,6 +48,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BLACKBOX_AI_INTEGRATION.md setup guide
 - blackbox-skill.yaml machine-readable manifest
 - Automated setup scripts (setup-blackbox-integration.sh/bat)
+
+### Changed
+
+- **Access control type updates** (breaking changes):
+  - `upload()` and `uploadChunk()`: `request.upload_request.accessControl` field changed
+  - `uploadNoResourceType()`: `request.accessControl` field changed
+  - `uploadText()`: `response.access_control[]` field changed
+  - `listImages()`, `listVideos()`, `listRawFiles()`, `listResourcesByAssetFolder()`, `listResourcesByAssetIDs()`, `listResourcesByContext()`, `listResourcesByModerationKindAndStatus()`: `response.resources[].accessControl[]` changed
+  - `getResourceByPublicId()`: `response.access_control[]` changed
+  - `getResourceByAssetId()`: `response.access_control[]` changed
+  - `updateResourceByPublicId()` and `updateResourceByAssetId()`: `request.resourceupdaterequest.accessControl` and `response.access_control[]` changed
+  - `searchAssets()` and `visualSearchAssets()`: `response.resources[].accessControl` changed
+- Access control types refactored: `AccessControl`, `AccessControlToken`, `AccessControlAnonymous` with proper inbound/outbound schema mapping
+- New `access_control` parameter added to `upload()` and `update*` operations for specifying access control settings
 
 ### Changed
 
