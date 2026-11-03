@@ -26,7 +26,7 @@
     "type": "git",
     "url": "https://github.com/cloudinary/asset-management-js.git"
   },
-"scripts": {
+  "scripts": {
     "lint": "eslint --cache --max-warnings=0 src",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
@@ -61,7 +61,8 @@
     "typescript-eslint": "^8.26.0"
   },
   "dependencies": {
-    "zod": "^3.20.0"
+    "@cloudinary/asset-management": "^0.5.9",
+    "zod": "^4.6.7"
   },
   "exports": {
     ".": {

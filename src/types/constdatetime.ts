@@ -6,7 +6,7 @@ import * as z from "zod";
 
 export function constDateTime(
   val: string,
-): z.ZodType<string, z.ZodTypeDef, unknown> {
+): z.ZodType<string, any, any> {
   return z.custom<string>((v) => {
     return (
       typeof v === "string" && new Date(v).getTime() === new Date(val).getTime()
